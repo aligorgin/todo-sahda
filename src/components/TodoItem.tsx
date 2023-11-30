@@ -12,25 +12,24 @@ interface Task {
 interface TodoItemProps {
     todo: Task;
     onToggle: (completed: boolean) => void;
-    onDelete: () => void;
+    onDelete: (id: string) => void;
 }
 
 export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
-    const isCompleted = todo.todoStatu === '2';
 
-    const handleToggle = () => onToggle(!isCompleted);
-    const handleDeleteClick = () => onDelete();
+    const handleToggle = () => onToggle(!false);
+    const handleDeleteClick = () => onDelete(todo.id);
 
     return (
         <div className='flex justify-center items-center mt-2 bg-zinc-800 p-2 w-[405px] mx-auto rounded-md'>
             <div className="flex-1 flex items-center overflow-x-auto">
                 <input
                     type="checkbox"
-                    checked={isCompleted}
+                    checked={todo.todoStatu === '2'}
                     onChange={handleToggle}
                     className='cursor-pointer w-4 focus:ring-0 focus:outline-none'
                 />
-                <p className={clsx("pl-3 text-lg whitespace-nowrap", isCompleted && 'line-through')}>{todo.item}</p>
+                <p className={clsx("pl-3 text-lg whitespace-nowrap", todo.todoStatu === '2' && 'line-through')}>{todo.item}</p>
             </div>
             <div className="border-l pl-3">
                 <TrashIcon

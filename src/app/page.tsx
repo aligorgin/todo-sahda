@@ -31,28 +31,85 @@ export default function Home() {
 	]);
 	const [loading, setLoading] = useState<boolean>(true);
 
-	const toggleTaskCompletion = (taskId: string, completed: boolean) => {
-		setTasks((prevState) =>
-			prevState.map((task) =>
-				task.id === taskId ? { ...task, todoStatu: completed ? '2' : '1' } : task
-			)
-		);
+	const toggleTaskCompletion = async (taskId: string, isCompleted: boolean) => {
+		try {
+			const newStatus = isCompleted ? '1' : '2';
+			const response = await fetch(`https://hr-todo.sahda.ir/update.php`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					id: taskId,
+					todoStatu: newStatus,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to update task status');
+			}
+
+			setTasks((prevTasks) =>
+				prevTasks.map((task) =>
+					task.id === task.id ? { ...task, todoStatu: newStatus } : task
+				)
+			);
+		} catch (error) {
+			console.error('Error updating task status:', error);
+		}
 	};
 
-	const handleDelete = (taskId: string) => {
-		setTasks((prevState) => prevState.filter((task) => task.id !== taskId));
+
+	const handleDelete = async (taskId: string) => {
+		try {
+			const response = await fetch('https://hr-todo.sahda.ir/delete.php', {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					id: taskId,
+					type: 2,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to delete task');
+			}
+
+			setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+		} catch (error) {
+			console.error('Error deleting task:', error);
+		}
 	};
 
-	const addTask = (text: string) => {
-		const newTask: Task = {
-			id: (Math.random() * 1000).toString(),
-			item: text,
-			todoStatu: '0',
-			addDate: new Date().toISOString(),
-			completDate: null,
-		};
+	const addTask = async (text: string) => {
+		try {
+			const response = await fetch('https://hr-todo.sahda.ir/create/task/', {
+				method: 'POST',
+				headers: {
+					"key": "Content-Type",
+					"value": "application/vnd.api+json",
+					"type": "text"
+				},
+				body: JSON.stringify({
+					id: (Math.random() * 1000).toString(),
+					item: text,
+					todoStatu: '1',
+					addDate: new Date().toISOString(),
+					completDate: null,
+				}),
+			});
+			if (!response.ok) {
+				throw new Error('Failed to add task');
+			}
 
-		setTasks((prevState) => [...prevState, newTask]);
+			const newTask = await response.json();
+
+			setTasks((prevTasks) => [...prevTasks, newTask]);
+		} catch (error) {
+			console.error('Error adding task:', error);
+		}
 	};
 
 	useEffect(() => {
